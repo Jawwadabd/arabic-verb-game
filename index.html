@@ -1,0 +1,1563 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Arabic Verb Conjugation Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(to right, #f9d423, #ff4e50);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            color: #aaa;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #f9d423;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #aaa;
+        }
+
+        /* Menu Screen */
+        .menu-screen {
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        .menu-btn {
+            display: block;
+            width: 80%;
+            max-width: 400px;
+            margin: 15px auto;
+            padding: 20px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .menu-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .btn-maazi { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .btn-muzaare { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .btn-amr { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .btn-mixed { background: linear-gradient(135deg, #f9d423, #ff4e50); }
+        .btn-identify { background: linear-gradient(135deg, #43e97b, #38f9d7); color: #333; }
+        .btn-translate { background: linear-gradient(135deg, #fa709a, #fee140); color: #333; }
+        .btn-learn { background: linear-gradient(135deg, #a18cd1, #fbc2eb); color: #333; }
+
+        .menu-btn .arabic-text {
+            font-size: 1.4em;
+            display: block;
+            margin-top: 5px;
+        }
+
+        .menu-btn .desc {
+            font-size: 0.75em;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        /* Game Screen */
+        .game-screen {
+            display: none;
+        }
+
+        .question-card {
+            background: rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .question-type {
+            font-size: 0.9em;
+            color: #f9d423;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .question-arabic {
+            font-size: 2.5em;
+            margin: 20px 0;
+            direction: rtl;
+            font-family: 'Traditional Arabic', 'Arabic Typesetting', serif;
+            line-height: 1.6;
+        }
+
+        .question-english {
+            font-size: 1.2em;
+            color: #ccc;
+            margin: 10px 0;
+        }
+
+        .question-hint {
+            font-size: 0.95em;
+            color: #aaa;
+            margin: 10px 0;
+            font-style: italic;
+        }
+
+        /* Options */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .option-btn {
+            padding: 18px 15px;
+            font-size: 1.3em;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            direction: rtl;
+            font-family: 'Traditional Arabic', 'Arabic Typesetting', serif;
+        }
+
+        .option-btn:hover {
+            border-color: #f9d423;
+            background: rgba(249, 212, 35, 0.1);
+            transform: scale(1.02);
+        }
+
+        .option-btn.correct {
+            border-color: #43e97b;
+            background: rgba(67, 233, 123, 0.2);
+            animation: correctPulse 0.5s ease;
+        }
+
+        .option-btn.wrong {
+            border-color: #ff4e50;
+            background: rgba(255, 78, 80, 0.2);
+            animation: shake 0.5s ease;
+        }
+
+        .option-btn .option-transliteration {
+            font-size: 0.6em;
+            color: #aaa;
+            display: block;
+            margin-top: 5px;
+            direction: ltr;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        @keyframes correctPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* Feedback */
+        .feedback {
+            display: none;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        .feedback.correct {
+            background: rgba(67, 233, 123, 0.15);
+            border: 1px solid #43e97b;
+            display: block;
+        }
+
+        .feedback.wrong {
+            background: rgba(255, 78, 80, 0.15);
+            border: 1px solid #ff4e50;
+            display: block;
+        }
+
+        .feedback-emoji {
+            font-size: 2em;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .feedback-explanation {
+            font-size: 0.9em;
+            color: #ccc;
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+
+        .feedback-arabic {
+            direction: rtl;
+            font-family: 'Traditional Arabic', 'Arabic Typesetting', serif;
+            font-size: 1.3em;
+        }
+
+        /* Next Button */
+        .next-btn {
+            display: none;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            background: linear-gradient(135deg, #f9d423, #ff4e50);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+        }
+
+        .next-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(249, 212, 35, 0.3);
+        }
+
+        /* Back Button */
+        .back-btn {
+            display: inline-block;
+            padding: 10px 25px;
+            font-size: 1em;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            color: #fff;
+            cursor: pointer;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, #f9d423, #ff4e50);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        /* Learn Screen */
+        .learn-screen {
+            display: none;
+        }
+
+        .learn-card {
+            background: rgba(255,255,255,0.08);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 15px 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .learn-card h3 {
+            color: #f9d423;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .learn-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+
+        .learn-table th, .learn-table td {
+            padding: 10px 8px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .learn-table th {
+            color: #f9d423;
+            font-size: 0.9em;
+        }
+
+        .learn-table .arabic-cell {
+            direction: rtl;
+            font-family: 'Traditional Arabic', 'Arabic Typesetting', serif;
+            font-size: 1.3em;
+        }
+
+        .learn-table .translit-cell {
+            color: #aaa;
+            font-size: 0.85em;
+        }
+
+        /* Streak */
+        .streak-display {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 10px 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.8em; }
+            .question-arabic { font-size: 1.8em; }
+            .options-grid { grid-template-columns: 1fr; }
+            .option-btn { font-size: 1.1em; }
+            .stats-bar { flex-wrap: wrap; gap: 10px; }
+        }
+
+        /* Results Screen */
+        .results-screen {
+            display: none;
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        .results-emoji {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .results-score {
+            font-size: 2.5em;
+            color: #f9d423;
+            font-weight: bold;
+        }
+
+        .results-message {
+            font-size: 1.2em;
+            color: #ccc;
+            margin: 15px 0;
+        }
+
+        /* Verb selector */
+        .verb-selector {
+            display: none;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .verb-chip {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 25px;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+        }
+
+        .verb-chip:hover, .verb-chip.selected {
+            border-color: #f9d423;
+            background: rgba(249, 212, 35, 0.15);
+        }
+
+        .verb-chip .chip-arabic {
+            font-family: 'Traditional Arabic', serif;
+            font-size: 1.2em;
+            direction: rtl;
+        }
+
+        .start-game-btn {
+            display: none;
+            width: 60%;
+            max-width: 300px;
+            margin: 20px auto;
+            padding: 15px;
+            font-size: 1.2em;
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+            border: none;
+            border-radius: 12px;
+            color: #333;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .start-game-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Tab buttons for learn screen */
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            cursor: pointer;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover, .tab-btn.active {
+            border-color: #f9d423;
+            background: rgba(249, 212, 35, 0.15);
+            color: #f9d423;
+        }
+
+        .verb-section {
+            display: none;
+        }
+
+        .verb-section.active {
+            display: block;
+        }
+
+        .tense-badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 15px;
+            font-size: 0.75em;
+            margin-left: 8px;
+        }
+
+        .badge-maazi { background: rgba(102, 126, 234, 0.3); color: #667eea; }
+        .badge-muzaare { background: rgba(245, 87, 108, 0.3); color: #f5576c; }
+        .badge-amr { background: rgba(79, 172, 254, 0.3); color: #4facfe; }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎮 Arabic Verb Master</h1>
+            <p>Learn ماضي، مُضارِع، أمر through fun games!</p>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-number" id="totalScore">0</div>
+                <div class="stat-label">Score</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="streakCount">🔥 0</div>
+                <div class="stat-label">Streak</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="accuracy">0%</div>
+                <div class="stat-label">Accuracy</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="level">1</div>
+                <div class="stat-label">Level</div>
+            </div>
+        </div>
+
+        <!-- Menu Screen -->
+        <div class="menu-screen" id="menuScreen">
+            <h2 style="margin-bottom: 25px; color: #f9d423;">Choose Your Game Mode</h2>
+
+            <button class="menu-btn btn-learn" onclick="showLearnScreen()">
+                📚 Learn First
+                <span class="arabic-text">تَعَلَّمْ أَوَّلًا</span>
+                <span class="desc">Review all verb tables before playing</span>
+            </button>
+
+            <button class="menu-btn btn-maazi" onclick="startGame('maazi')">
+                🕐 Past Tense Quiz
+                <span class="arabic-text">فِعْل مَاضِي</span>
+                <span class="desc">Practice past tense conjugations</span>
+            </button>
+
+            <button class="menu-btn btn-muzaare" onclick="startGame('muzaare')">
+                ⏰ Present Tense Quiz
+                <span class="arabic-text">فِعْل مُضَارِع</span>
+                <span class="desc">Practice present tense conjugations</span>
+            </button>
+
+            <button class="menu-btn btn-amr" onclick="startGame('amr')">
+                📢 Command Quiz
+                <span class="arabic-text">فِعْل أَمْر</span>
+                <span class="desc">Practice imperative forms</span>
+            </button>
+
+            <button class="menu-btn btn-mixed" onclick="startGame('mixed')">
+                🎲 Mixed Challenge
+                <span class="arabic-text">تَحَدِّي مُخْتَلِط</span>
+                <span class="desc">Random questions from all tenses</span>
+            </button>
+
+            <button class="menu-btn btn-identify" onclick="startGame('identify')">
+                🔍 Identify the Tense
+                <span class="arabic-text">حَدِّدِ الزَّمَنَ</span>
+                <span class="desc">Given a verb, identify if it's ماضي، مضارع or أمر</span>
+            </button>
+
+            <button class="menu-btn btn-translate" onclick="startGame('translate')">
+                🌐 Translate It!
+                <span class="arabic-text">تَرْجِمْ</span>
+                <span class="desc">Translate English sentences to Arabic verb forms</span>
+            </button>
+        </div>
+
+        <!-- Learn Screen -->
+        <div class="learn-screen" id="learnScreen">
+            <button class="back-btn" onclick="goToMenu()">← Back to Menu</button>
+            <h2 style="text-align:center; color: #f9d423; margin: 20px 0;">📚 Verb Conjugation Tables</h2>
+
+            <div class="tab-buttons" id="learnTabs"></div>
+            <div id="learnContent"></div>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="game-screen" id="gameScreen">
+            <button class="back-btn" onclick="goToMenu()">← Back to Menu</button>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div style="text-align:center; color:#aaa; margin:5px 0;">
+                Question <span id="currentQ">1</span> of <span id="totalQ">10</span>
+            </div>
+
+            <div class="question-card">
+                <div class="question-type" id="questionType"></div>
+                <div class="question-arabic" id="questionArabic"></div>
+                <div class="question-english" id="questionEnglish"></div>
+                <div class="question-hint" id="questionHint"></div>
+            </div>
+
+            <div class="options-grid" id="optionsGrid"></div>
+
+            <div class="feedback" id="feedback">
+                <span class="feedback-emoji" id="feedbackEmoji"></span>
+                <div id="feedbackText"></div>
+                <div class="feedback-explanation" id="feedbackExplanation"></div>
+            </div>
+
+            <button class="next-btn" id="nextBtn" onclick="nextQuestion()">
+                Next Question →
+            </button>
+        </div>
+
+        <!-- Results Screen -->
+        <div class="results-screen" id="resultsScreen">
+            <div class="results-emoji" id="resultsEmoji">🎉</div>
+            <div class="results-score" id="resultsScore">8/10</div>
+            <div class="results-message" id="resultsMessage">Great job!</div>
+
+            <div style="margin: 30px 0;">
+                <button class="menu-btn btn-mixed" onclick="restartSameMode()" style="width:60%;">
+                    🔄 Play Again
+                </button>
+                <button class="menu-btn btn-learn" onclick="goToMenu()" style="width:60%;">
+                    🏠 Back to Menu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ============================================
+    // COMPLETE ARABIC VERB DATABASE
+    // ============================================
+
+    const verbs = [
+        {
+            id: 'tasallama',
+            root: 'تَسَلَّمَ',
+            meaning: 'to receive',
+            masdar: 'تَسَلُّم / اِسْتِلَام',
+            maazi: {
+                'أَنَا': { form: 'تَسَلَّمْتُ', translit: 'tasallamtu' },
+                'نَحْنُ': { form: 'تَسَلَّمْنَا', translit: 'tasallamnaa' },
+                'أَنْتَ': { form: 'تَسَلَّمْتَ', translit: 'tasallamta' },
+                'أَنْتِ': { form: 'تَسَلَّمْتِ', translit: 'tasallamti' },
+                'أَنْتُمَا': { form: 'تَسَلَّمْتُمَا', translit: 'tasallamtumaa' },
+                'أَنْتُمْ': { form: 'تَسَلَّمْتُمْ', translit: 'tasallamtum' },
+                'أَنْتُنَّ': { form: 'تَسَلَّمْتُنَّ', translit: 'tasallamtunna' },
+                'هُوَ': { form: 'تَسَلَّمَ', translit: 'tasallama' },
+                'هِيَ': { form: 'تَسَلَّمَتْ', translit: 'tasallamat' },
+                'هُمَا (m)': { form: 'تَسَلَّمَا', translit: 'tasallamaa' },
+                'هُمَا (f)': { form: 'تَسَلَّمَتَا', translit: 'tasallamataa' },
+                'هُمْ': { form: 'تَسَلَّمُوا', translit: 'tasallamoo' },
+                'هُنَّ': { form: 'تَسَلَّمْنَ', translit: 'tasallamna' }
+            },
+            muzaare: {
+                'أَنَا': { form: 'أَتَسَلَّمُ', translit: 'atasallamu' },
+                'نَحْنُ': { form: 'نَتَسَلَّمُ', translit: 'natasallamu' },
+                'أَنْتَ': { form: 'تَتَسَلَّمُ', translit: 'tatasallamu' },
+                'أَنْتِ': { form: 'تَتَسَلَّمِينَ', translit: 'tatasallameena' },
+                'أَنْتُمَا': { form: 'تَتَسَلَّمَانِ', translit: 'tatasallamaani' },
+                'أَنْتُمْ': { form: 'تَتَسَلَّمُونَ', translit: 'tatasallamoona' },
+                'أَنْتُنَّ': { form: 'تَتَسَلَّمْنَ', translit: 'tatasallamna' },
+                'هُوَ': { form: 'يَتَسَلَّمُ', translit: 'yatasallamu' },
+                'هِيَ': { form: 'تَتَسَلَّمُ', translit: 'tatasallamu' },
+                'هُمَا (m)': { form: 'يَتَسَلَّمَانِ', translit: 'yatasallamaani' },
+                'هُمَا (f)': { form: 'تَتَسَلَّمَانِ', translit: 'tatasallamaani' },
+                'هُمْ': { form: 'يَتَسَلَّمُونَ', translit: 'yatasallamoona' },
+                'هُنَّ': { form: 'يَتَسَلَّمْنَ', translit: 'yatasallamna' }
+            },
+            amr: {
+                'أَنْتَ': { form: 'تَسَلَّمْ', translit: 'tasallam' },
+                'أَنْتِ': { form: 'تَسَلَّمِي', translit: 'tasallamee' },
+                'أَنْتُمَا': { form: 'تَسَلَّمَا', translit: 'tasallamaa' },
+                'أَنْتُمْ': { form: 'تَسَلَّمُوا', translit: 'tasallamoo' },
+                'أَنْتُنَّ': { form: 'تَسَلَّمْنَ', translit: 'tasallamna' }
+            }
+        },
+        {
+            id: 'saafara',
+            root: 'سَافَرَ',
+            meaning: 'to travel',
+            masdar: 'سَفَر / مُسَافَرَة',
+            maazi: {
+                'أَنَا': { form: 'سَافَرْتُ', translit: 'saafartu' },
+                'نَحْنُ': { form: 'سَافَرْنَا', translit: 'saafarnaa' },
+                'أَنْتَ': { form: 'سَافَرْتَ', translit: 'saafarta' },
+                'أَنْتِ': { form: 'سَافَرْتِ', translit: 'saafarti' },
+                'أَنْتُمَا': { form: 'سَافَرْتُمَا', translit: 'saafartumaa' },
+                'أَنْتُمْ': { form: 'سَافَرْتُمْ', translit: 'saafartum' },
+                'أَنْتُنَّ': { form: 'سَافَرْتُنَّ', translit: 'saafartunna' },
+                'هُوَ': { form: 'سَافَرَ', translit: 'saafara' },
+                'هِيَ': { form: 'سَافَرَتْ', translit: 'saafarat' },
+                'هُمَا (m)': { form: 'سَافَرَا', translit: 'saafaraa' },
+                'هُمَا (f)': { form: 'سَافَرَتَا', translit: 'saafarataa' },
+                'هُمْ': { form: 'سَافَرُوا', translit: 'saafaroo' },
+                'هُنَّ': { form: 'سَافَرْنَ', translit: 'saafarna' }
+            },
+            muzaare: {
+                'أَنَا': { form: 'أُسَافِرُ', translit: 'usaafiru' },
+                'نَحْنُ': { form: 'نُسَافِرُ', translit: 'nusaafiru' },
+                'أَنْتَ': { form: 'تُسَافِرُ', translit: 'tusaafiru' },
+                'أَنْتِ': { form: 'تُسَافِرِينَ', translit: 'tusaafireena' },
+                'أَنْتُمَا': { form: 'تُسَافِرَانِ', translit: 'tusaafiraani' },
+                'أَنْتُمْ': { form: 'تُسَافِرُونَ', translit: 'tusaafiroona' },
+                'أَنْتُنَّ': { form: 'تُسَافِرْنَ', translit: 'tusaafirna' },
+                'هُوَ': { form: 'يُسَافِرُ', translit: 'yusaafiru' },
+                'هِيَ': { form: 'تُسَافِرُ', translit: 'tusaafiru' },
+                'هُمَا (m)': { form: 'يُسَافِرَانِ', translit: 'yusaafiraani' },
+                'هُمَا (f)': { form: 'تُسَافِرَانِ', translit: 'tusaafiraani' },
+                'هُمْ': { form: 'يُسَافِرُونَ', translit: 'yusaafiroona' },
+                'هُنَّ': { form: 'يُسَافِرْنَ', translit: 'yusaafirna' }
+            },
+            amr: {
+                'أَنْتَ': { form: 'سَافِرْ', translit: 'saafir' },
+                'أَنْتِ': { form: 'سَافِرِي', translit: 'saafiree' },
+                'أَنْتُمَا': { form: 'سَافِرَا', translit: 'saafiraa' },
+                'أَنْتُمْ': { form: 'سَافِرُوا', translit: 'saafiroo' },
+                'أَنْتُنَّ': { form: 'سَافِرْنَ', translit: 'saafirna' }
+            }
+        },
+        {
+            id: 'akmala',
+            root: 'أَكْمَلَ',
+            meaning: 'to complete',
+            masdar: 'إِكْمَال',
+            maazi: {
+                'أَنَا': { form: 'أَكْمَلْتُ', translit: 'akmaltu' },
+                'نَحْنُ': { form: 'أَكْمَلْنَا', translit: 'akmalnaa' },
+                'أَنْتَ': { form: 'أَكْمَلْتَ', translit: 'akmalta' },
+                'أَنْتِ': { form: 'أَكْمَلْتِ', translit: 'akmalti' },
+                'أَنْتُمَا': { form: 'أَكْمَلْتُمَا', translit: 'akmaltumaa' },
+                'أَنْتُمْ': { form: 'أَكْمَلْتُمْ', translit: 'akmaltum' },
+                'أَنْتُنَّ': { form: 'أَكْمَلْتُنَّ', translit: 'akmaltunna' },
+                'هُوَ': { form: 'أَكْمَلَ', translit: 'akmala' },
+                'هِيَ': { form: 'أَكْمَلَتْ', translit: 'akmalat' },
+                'هُمَا (m)': { form: 'أَكْمَلَا', translit: 'akmalaa' },
+                'هُمَا (f)': { form: 'أَكْمَلَتَا', translit: 'akmalataa' },
+                'هُمْ': { form: 'أَكْمَلُوا', translit: 'akmaloo' },
+                'هُنَّ': { form: 'أَكْمَلْنَ', translit: 'akmalna' }
+            },
+            muzaare: {
+                'أَنَا': { form: 'أُكْمِلُ', translit: 'ukmilu' },
+                'نَحْنُ': { form: 'نُكْمِلُ', translit: 'nukmilu' },
+                'أَنْتَ': { form: 'تُكْمِلُ', translit: 'tukmilu' },
+                'أَنْتِ': { form: 'تُكْمِلِينَ', translit: 'tukmileena' },
+                'أَنْتُمَا': { form: 'تُكْمِلَانِ', translit: 'tukmilaani' },
+                'أَنْتُمْ': { form: 'تُكْمِلُونَ', translit: 'tukmiloona' },
+                'أَنْتُنَّ': { form: 'تُكْمِلْنَ', translit: 'tukmilna' },
+                'هُوَ': { form: 'يُكْمِلُ', translit: 'yukmilu' },
+                'هِيَ': { form: 'تُكْمِلُ', translit: 'tukmilu' },
+                'هُمَا (m)': { form: 'يُكْمِلَانِ', translit: 'yukmilaani' },
+                'هُمَا (f)': { form: 'تُكْمِلَانِ', translit: 'tukmilaani' },
+                'هُمْ': { form: 'يُكْمِلُونَ', translit: 'yukmiloona' },
+                'هُنَّ': { form: 'يُكْمِلْنَ', translit: 'yukmilna' }
+            },
+            amr: {
+                'أَنْتَ': { form: 'أَكْمِلْ', translit: 'akmil' },
+                'أَنْتِ': { form: 'أَكْمِلِي', translit: 'akmilee' },
+                'أَنْتُمَا': { form: 'أَكْمِلَا', translit: 'akmilaa' },
+                'أَنْتُمْ': { form: 'أَكْمِلُوا', translit: 'akmiloo' },
+                'أَنْتُنَّ': { form: 'أَكْمِلْنَ', translit: 'akmilna' }
+            }
+        },
+        {
+            id: 'kataba',
+            root: 'كَتَبَ',
+            meaning: 'to write',
+            masdar: 'كِتَابَة',
+            maazi: {
+                'أَنَا': { form: 'كَتَبْتُ', translit: 'katabtu' },
+                'نَحْنُ': { form: 'كَتَبْنَا', translit: 'katabnaa' },
+                'أَنْتَ': { form: 'كَتَبْتَ', translit: 'katabta' },
+                'أَنْتِ': { form: 'كَتَبْتِ', translit: 'katabti' },
+                'أَنْتُمَا': { form: 'كَتَبْتُمَا', translit: 'katabtumaa' },
+                'أَنْتُمْ': { form: 'كَتَبْتُمْ', translit: 'katabtum' },
+                'أَنْتُنَّ': { form: 'كَتَبْتُنَّ', translit: 'katabtunna' },
+                'هُوَ': { form: 'كَتَبَ', translit: 'kataba' },
+                'هِيَ': { form: 'كَتَبَتْ', translit: 'katabat' },
+                'هُمَا (m)': { form: 'كَتَبَا', translit: 'katabaa' },
+                'هُمَا (f)': { form: 'كَتَبَتَا', translit: 'katabataa' },
+                'هُمْ': { form: 'كَتَبُوا', translit: 'kataboo' },
+                'هُنَّ': { form: 'كَتَبْنَ', translit: 'katabna' }
+            },
+            muzaare: {
+                'أَنَا': { form: 'أَكْتُبُ', translit: 'aktubu' },
+                'نَحْنُ': { form: 'نَكْتُبُ', translit: 'naktubu' },
+                'أَنْتَ': { form: 'تَكْتُبُ', translit: 'taktubu' },
+                'أَنْتِ': { form: 'تَكْتُبِينَ', translit: 'taktubeena' },
+                'أَنْتُمَا': { form: 'تَكْتُبَانِ', translit: 'taktubaani' },
+                'أَنْتُمْ': { form: 'تَكْتُبُونَ', translit: 'taktuboona' },
+                'أَنْتُنَّ': { form: 'تَكْتُبْنَ', translit: 'taktubna' },
+                'هُوَ': { form: 'يَكْتُبُ', translit: 'yaktubu' },
+                'هِيَ': { form: 'تَكْتُبُ', translit: 'taktubu' },
+                'هُمَا (m)': { form: 'يَكْتُبَانِ', translit: 'yaktubaani' },
+                'هُمَا (f)': { form: 'تَكْتُبَانِ', translit: 'taktubaani' },
+                'هُمْ': { form: 'يَكْتُبُونَ', translit: 'yaktuboona' },
+                'هُنَّ': { form: 'يَكْتُبْنَ', translit: 'yaktubna' }
+            },
+            amr: {
+                'أَنْتَ': { form: 'اُكْتُبْ', translit: 'uktub' },
+                'أَنْتِ': { form: 'اُكْتُبِي', translit: 'uktubee' },
+                'أَنْتُمَا': { form: 'اُكْتُبَا', translit: 'uktubaa' },
+                'أَنْتُمْ': { form: 'اُكْتُبُوا', translit: 'uktuboo' },
+                'أَنْتُنَّ': { form: 'اُكْتُبْنَ', translit: 'uktubna' }
+            }
+        },
+        {
+            id: 'dhahaba',
+            root: 'ذَهَبَ',
+            meaning: 'to go',
+            masdar: 'ذَهَاب',
+            maazi: {
+                'أَنَا': { form: 'ذَهَبْتُ', translit: 'dhahabtu' },
+                'نَحْنُ': { form: 'ذَهَبْنَا', translit: 'dhahabnaa' },
+                'أَنْتَ': { form: 'ذَهَبْتَ', translit: 'dhahabta' },
+                'أَنْتِ': { form: 'ذَهَبْتِ', translit: 'dhahabti' },
+                'أَنْتُمَا': { form: 'ذَهَبْتُمَا', translit: 'dhahabtumaa' },
+                'أَنْتُمْ': { form: 'ذَهَبْتُمْ', translit: 'dhahabtum' },
+                'أَنْتُنَّ': { form: 'ذَهَبْتُنَّ', translit: 'dhahabtunna' },
+                'هُوَ': { form: 'ذَهَبَ', translit: 'dhahaba' },
+                'هِيَ': { form: 'ذَهَبَتْ', translit: 'dhahabat' },
+                'هُمَا (m)': { form: 'ذَهَبَا', translit: 'dhahabaa' },
+                'هُمَا (f)': { form: 'ذَهَبَتَا', translit: 'dhahabataa' },
+                'هُمْ': { form: 'ذَهَبُوا', translit: 'dhahaboo' },
+                'هُنَّ': { form: 'ذَهَبْنَ', translit: 'dhahabna' }
+            },
+            muzaare: {
+                'أَنَا': { form: 'أَذْهَبُ', translit: 'adhhabu' },
+                'نَحْنُ': { form: 'نَذْهَبُ', translit: 'nadhhabu' },
+                'أَنْتَ': { form: 'تَذْهَبُ', translit: 'tadhhabu' },
+                'أَنْتِ': { form: 'تَذْهَبِينَ', translit: 'tadhhabeena' },
+                'أَنْتُمَا': { form: 'تَذْهَبَانِ', translit: 'tadhhabaani' },
+                'أَنْتُمْ': { form: 'تَذْهَبُونَ', translit: 'tadhhaboona' },
+                'أَنْتُنَّ': { form: 'تَذْهَبْنَ', translit: 'tadhhbna' },
+                'هُوَ': { form: 'يَذْهَبُ', translit: 'yadhhabu' },
+                'هِيَ': { form: 'تَذْهَبُ', translit: 'tadhhabu' },
+                'هُمَا (m)': { form: 'يَذْهَبَانِ', translit: 'yadhhabaani' },
+                'هُمَا (f)': { form: 'تَذْهَبَانِ', translit: 'tadhhabaani' },
+                'هُمْ': { form: 'يَذْهَبُونَ', translit: 'yadhhaboona' },
+                'هُنَّ': { form: 'يَذْهَبْنَ', translit: 'yadhhbna' }
+            },
+            amr: {
+                'أَنْتَ': { form: 'اِذْهَبْ', translit: 'idh-hab' },
+                'أَنْتِ': { form: 'اِذْهَبِي', translit: 'idh-habee' },
+                'أَنْتُمَا': { form: 'اِذْهَبَا', translit: 'idh-habaa' },
+                'أَنْتُمْ': { form: 'اِذْهَبُوا', translit: 'idh-haboo' },
+                'أَنْتُنَّ': { form: 'اِذْهَبْنَ', translit: 'idh-habna' }
+            }
+        },
+        {
+            id: 'hajaza',
+            root: 'حَجَزَ',
+            meaning: 'to book/reserve',
+            masdar: 'حَجْز',
+            maazi: {
+                'أَنَا': { form: 'حَجَزْتُ', translit: 'hajaztu' },
+                'نَحْنُ': { form: 'حَجَزْنَا', translit: 'hajaznaa' },
+                'أَنْتَ': { form: 'حَجَزْتَ', translit: 'hajazta' },
+                'أَنْتِ': { form: 'حَجَزْتِ', translit: 'hajazti' },
+                'أَنْتُمَا': { form: 'حَجَزْتُمَا', translit: 'hajaztumaa' },
+                'أَنْتُمْ': { form: 'حَجَزْتُمْ', translit: 'hajaztum' },
+                'أَنْتُنَّ': { form: 'حَجَزْتُنَّ', translit: 'hajaztunna' },
+                'هُوَ': { form: 'حَجَزَ', translit: 'hajaza' },
+                'هِيَ': { form: 'حَجَزَتْ', translit: 'hajazat' },
+                'هُمَا (m)': { form: 'حَجَزَا', translit: 'hajazaa' },
+                'هُمَا (f)': { form: 'حَجَزَتَا', translit: 'hajazataa' },
+                'هُمْ': { form: 'حَجَزُوا', translit: 'hajazoo' },
+                'هُنَّ': { form: 'حَجَزْنَ', translit: 'hajazna' }
+            },
+            muzaare: {
+                'أَنَا': { form: 'أَحْجِزُ', translit: 'ahjizu' },
+                'نَحْنُ': { form: 'نَحْجِزُ', translit: 'nahjizu' },
+                'أَنْتَ': { form: 'تَحْجِزُ', translit: 'tahjizu' },
+                'أَنْتِ': { form: 'تَحْجِزِينَ', translit: 'tahjizeena' },
+                'أَنْتُمَا': { form: 'تَحْجِزَانِ', translit: 'tahjizaani' },
+                'أَنْتُمْ': { form: 'تَحْجِزُونَ', translit: 'tahjizoona' },
+                'أَنْتُنَّ': { form: 'تَحْجِزْنَ', translit: 'tahjizna' },
+                'هُوَ': { form: 'يَحْجِزُ', translit: 'yahjizu' },
+                'هِيَ': { form: 'تَحْجِزُ', translit: 'tahjizu' },
+                'هُمَا (m)': { form: 'يَحْجِزَانِ', translit: 'yahjizaani' },
+                'هُمَا (f)': { form: 'تَحْجِزَانِ', translit: 'tahjizaani' },
+                'هُمْ': { form: 'يَحْجِزُونَ', translit: 'yahjizoona' },
+                'هُنَّ': { form: 'يَحْجِزْنَ', translit: 'yahjizna' }
+            },
+            amr: {
+                'أَنْتَ': { form: 'اِحْجِزْ', translit: 'ihjiz' },
+                'أَنْتِ': { form: 'اِحْجِزِي', translit: 'ihjizee' },
+                'أَنْتُمَا': { form: 'اِحْجِزَا', translit: 'ihjizaa' },
+                'أَنْتُمْ': { form: 'اِحْجِزُوا', translit: 'ihjizoo' },
+                'أَنْتُنَّ': { form: 'اِحْجِزْنَ', translit: 'ihjizna' }
+            }
+        },
+        {
+            id: 'arafa',
+            root: 'عَرَفَ',
+            meaning: 'to know',
+            masdar: 'مَعْرِفَة',
+            maazi: {
+                'أَنَا': { form: 'عَرَفْتُ', translit: 'araftu' },
+                'نَحْنُ': { form: 'عَرَفْنَا', translit: 'arafnaa' },
+                'أَنْتَ': { form: 'عَرَفْتَ', translit: 'arafta' },
+                'أَنْتِ': { form: 'عَرَفْتِ', translit: 'arafti' },
+                'أَنْتُمَا': { form: 'عَرَفْتُمَا', translit: 'araftumaa' },
+                'أَنْتُمْ': { form: 'عَرَفْتُمْ', translit: 'araftum' },
+                'أَنْتُنَّ': { form: 'عَرَفْتُنَّ', translit: 'araftunna' },
+                'هُوَ': { form: 'عَرَفَ', translit: 'arafa' },
+                'هِيَ': { form: 'عَرَفَتْ', translit: 'arafat' },
+                'هُمَا (m)': { form: 'عَرَفَا', translit: 'arafaa' },
+                'هُمَا (f)': { form: 'عَرَفَتَا', translit: 'arafataa' },
+                'هُمْ': { form: 'عَرَفُوا', translit: 'arafoo' },
+                'هُنَّ': { form: 'عَرَفْنَ', translit: 'arafna' }
+            },
+            muzaare: {
+                'أَنَا': { form: 'أَعْرِفُ', translit: 'arifu' },
+                'نَحْنُ': { form: 'نَعْرِفُ', translit: 'narifu' },
+                'أَنْتَ': { form: 'تَعْرِفُ', translit: 'tarifu' },
+                'أَنْتِ': { form: 'تَعْرِفِينَ', translit: 'tarifeena' },
+                'أَنْتُمَا': { form: 'تَعْرِفَانِ', translit: 'tarifaani' },
+                'أَنْتُمْ': { form: 'تَعْرِفُونَ', translit: 'tarifoona' },
+                'أَنْتُنَّ': { form: 'تَعْرِفْنَ', translit: 'tarifna' },
+                'هُوَ': { form: 'يَعْرِفُ', translit: 'yarifu' },
+                'هِيَ': { form: 'تَعْرِفُ', translit: 'tarifu' },
+                'هُمَا (m)': { form: 'يَعْرِفَانِ', translit: 'yarifaani' },
+                'هُمَا (f)': { form: 'تَعْرِفَانِ', translit: 'tarifaani' },
+                'هُمْ': { form: 'يَعْرِفُونَ', translit: 'yarifoona' },
+                'هُنَّ': { form: 'يَعْرِفْنَ', translit: 'yarifna' }
+            },
+            amr: {
+                'أَنْتَ': { form: 'اِعْرِفْ', translit: 'irif' },
+                'أَنْتِ': { form: 'اِعْرِفِي', translit: 'irifee' },
+                'أَنْتُمَا': { form: 'اِعْرِفَا', translit: 'irifaa' },
+                'أَنْتُمْ': { form: 'اِعْرِفُوا', translit: 'irifoo' },
+                'أَنْتُنَّ': { form: 'اِعْرِفْنَ', translit: 'irifna' }
+            }
+        },
+        {
+            id: 'sakana',
+            root: 'سَكَنَ',
+            meaning: 'to live/reside',
+            masdar: 'سَكَن / سُكْنَى',
+            maazi: {
+                'أَنَا': { form: 'سَكَنْتُ', translit: 'sakantu' },
+                'نَحْنُ': { form: 'سَكَنَّا', translit: 'sakannaa' },
+                'أَنْتَ': { form: 'سَكَنْتَ', translit: 'sakanta' },
+                'أَنْتِ': { form: 'سَكَنْتِ', translit: 'sakanti' },
+                'أَنْتُمَا': { form: 'سَكَنْتُمَا', translit: 'sakantumaa' },
+                'أَنْتُمْ': { form: 'سَكَنْتُمْ', translit: 'sakantum' },
+                'أَنْتُنَّ': { form: 'سَكَنْتُنَّ', translit: 'sakantunna' },
+                'هُوَ': { form: 'سَكَنَ', translit: 'sakana' },
+                'هِيَ': { form: 'سَكَنَتْ', translit: 'sakanat' },
+                'هُمَا (m)': { form: 'سَكَنَا', translit: 'sakanaa' },
+                'هُمَا (f)': { form: 'سَكَنَتَا', translit: 'sakanataa' },
+                'هُمْ': { form: 'سَكَنُوا', translit: 'sakanoo' },
+                'هُنَّ': { form: 'سَكَنَّ', translit: 'sakanna' }
+            },
+            muzaare: {
+                'أَنَا': { form: 'أَسْكُنُ', translit: 'askunu' },
+                'نَحْنُ': { form: 'نَسْكُنُ', translit: 'naskunu' },
+                'أَنْتَ': { form: 'تَسْكُنُ', translit: 'taskunu' },
+                'أَنْتِ': { form: 'تَسْكُنِينَ', translit: 'taskuneena' },
+                'أَنْتُمَا': { form: 'تَسْكُنَانِ', translit: 'taskunaani' },
+                'أَنْتُمْ': { form: 'تَسْكُنُونَ', translit: 'taskunoona' },
+                'أَنْتُنَّ': { form: 'تَسْكُنَّ', translit: 'taskunna' },
+                'هُوَ': { form: 'يَسْكُنُ', translit: 'yaskunu' },
+                'هِيَ': { form: 'تَسْكُنُ', translit: 'taskunu' },
+                'هُمَا (m)': { form: 'يَسْكُنَانِ', translit: 'yaskunaani' },
+                'هُمَا (f)': { form: 'تَسْكُنَانِ', translit: 'taskunaani' },
+                'هُمْ': { form: 'يَسْكُنُونَ', translit: 'yaskunoona' },
+                'هُنَّ': { form: 'يَسْكُنَّ', translit: 'yaskunna' }
+            },
+            amr: {
+                'أَنْتَ': { form: 'اُسْكُنْ', translit: 'uskun' },
+                'أَنْتِ': { form: 'اُسْكُنِي', translit: 'uskunee' },
+                'أَنْتُمَا': { form: 'اُسْكُنَا', translit: 'uskunaa' },
+                'أَنْتُمْ': { form: 'اُسْكُنُوا', translit: 'uskunoo' },
+                'أَنْتُنَّ': { form: 'اُسْكُنَّ', translit: 'uskunna' }
+            }
+        }
+    ];
+
+    // Pronoun meanings
+    const pronounMeanings = {
+        'أَنَا': 'I',
+        'نَحْنُ': 'We',
+        'أَنْتَ': 'You (m.sg)',
+        'أَنْتِ': 'You (f.sg)',
+        'أَنْتُمَا': 'You (dual)',
+        'أَنْتُمْ': 'You (m.pl)',
+        'أَنْتُنَّ': 'You (f.pl)',
+        'هُوَ': 'He',
+        'هِيَ': 'She',
+        'هُمَا (m)': 'They two (m)',
+        'هُمَا (f)': 'They two (f)',
+        'هُمْ': 'They (m)',
+        'هُنَّ': 'They (f)'
+    };
+
+    const tenseNames = {
+        'maazi': 'Past Tense (ماضي)',
+        'muzaare': 'Present Tense (مُضَارِع)',
+        'amr': 'Command (أَمْر)'
+    };
+
+        const tenseEnglish = {
+        'maazi': 'Past',
+        'muzaare': 'Present/Future',
+        'amr': 'Command'
+    };
+
+    const tenseTranslations = {
+        'maazi': {
+            'أَنَا': 'I [verb]ed',
+            'نَحْنُ': 'We [verb]ed',
+            'أَنْتَ': 'You (m) [verb]ed',
+            'أَنْتِ': 'You (f) [verb]ed',
+            'أَنْتُمَا': 'You two [verb]ed',
+            'أَنْتُمْ': 'You all (m) [verb]ed',
+            'أَنْتُنَّ': 'You all (f) [verb]ed',
+            'هُوَ': 'He [verb]ed',
+            'هِيَ': 'She [verb]ed',
+            'هُمَا (m)': 'They two (m) [verb]ed',
+            'هُمَا (f)': 'They two (f) [verb]ed',
+            'هُمْ': 'They (m) [verb]ed',
+            'هُنَّ': 'They (f) [verb]ed'
+        },
+        'muzaare': {
+            'أَنَا': 'I [verb]',
+            'نَحْنُ': 'We [verb]',
+            'أَنْتَ': 'You (m) [verb]',
+            'أَنْتِ': 'You (f) [verb]',
+            'أَنْتُمَا': 'You two [verb]',
+            'أَنْتُمْ': 'You all (m) [verb]',
+            'أَنْتُنَّ': 'You all (f) [verb]',
+            'هُوَ': 'He [verb]s',
+            'هِيَ': 'She [verb]s',
+            'هُمَا (m)': 'They two (m) [verb]',
+            'هُمَا (f)': 'They two (f) [verb]',
+            'هُمْ': 'They (m) [verb]',
+            'هُنَّ': 'They (f) [verb]'
+        },
+        'amr': {
+            'أَنْتَ': '[Verb]! (to 1 male)',
+            'أَنْتِ': '[Verb]! (to 1 female)',
+            'أَنْتُمَا': '[Verb]! (to 2 people)',
+            'أَنْتُمْ': '[Verb]! (to males)',
+            'أَنْتُنَّ': '[Verb]! (to females)'
+        }
+    };
+
+    // ============================================
+    // GAME STATE
+    // ============================================
+    let gameState = {
+        mode: '',
+        questions: [],
+        currentIndex: 0,
+        score: 0,
+        totalCorrect: 0,
+        totalAnswered: 0,
+        streak: 0,
+        maxStreak: 0,
+        level: 1,
+        answered: false
+    };
+
+    // ============================================
+    // LEARN SCREEN
+    // ============================================
+    function showLearnScreen() {
+        document.getElementById('menuScreen').style.display = 'none';
+        document.getElementById('learnScreen').style.display = 'block';
+        document.getElementById('gameScreen').style.display = 'none';
+        document.getElementById('resultsScreen').style.display = 'none';
+
+        // Build tabs
+        let tabsHTML = '';
+        verbs.forEach((verb, index) => {
+            tabsHTML += `<button class="tab-btn ${index === 0 ? 'active' : ''}" 
+                          onclick="showVerbTab(${index})">${verb.root}<br><small>${verb.meaning}</small></button>`;
+        });
+        document.getElementById('learnTabs').innerHTML = tabsHTML;
+
+        // Build content
+        let contentHTML = '';
+        verbs.forEach((verb, index) => {
+            contentHTML += `<div class="verb-section ${index === 0 ? 'active' : ''}" id="verbSection${index}">`;
+            contentHTML += `<h2 style="text-align:center; margin:20px 0; direction:rtl; font-family:'Traditional Arabic',serif; font-size:2em;">${verb.root}</h2>`;
+            contentHTML += `<p style="text-align:center; color:#aaa; margin-bottom:20px;">Meaning: <strong>${verb.meaning}</strong> | Masdar: <span style="font-family:'Traditional Arabic',serif;">${verb.masdar}</span></p>`;
+
+            // Maazi Table
+            contentHTML += buildLearnTable(verb, 'maazi', 'Past Tense (ماضي)', 'badge-maazi');
+            // Muzaare Table
+            contentHTML += buildLearnTable(verb, 'muzaare', 'Present Tense (مُضَارِع)', 'badge-muzaare');
+            // Amr Table
+            contentHTML += buildLearnTable(verb, 'amr', 'Command (أَمْر)', 'badge-amr');
+
+            contentHTML += '</div>';
+        });
+        document.getElementById('learnContent').innerHTML = contentHTML;
+    }
+
+    function buildLearnTable(verb, tense, title, badgeClass) {
+        let html = `<div class="learn-card">`;
+        html += `<h3>${title} <span class="tense-badge ${badgeClass}">${tenseEnglish[tense]}</span></h3>`;
+        html += `<table class="learn-table">`;
+        html += `<tr><th>Pronoun</th><th>Meaning</th><th>Arabic Form</th><th>Transliteration</th></tr>`;
+
+        const data = verb[tense];
+        for (let pronoun in data) {
+            const meaning = pronounMeanings[pronoun] || pronoun;
+            html += `<tr>
+                <td class="arabic-cell">${pronoun}</td>
+                <td>${meaning}</td>
+                <td class="arabic-cell" style="color:#f9d423; font-size:1.4em;">${data[pronoun].form}</td>
+                <td class="translit-cell">${data[pronoun].translit}</td>
+            </tr>`;
+        }
+        html += `</table></div>`;
+        return html;
+    }
+
+    function showVerbTab(index) {
+        // Update tabs
+        document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+            btn.classList.toggle('active', i === index);
+        });
+        // Update sections
+        document.querySelectorAll('.verb-section').forEach((sec, i) => {
+            sec.classList.toggle('active', i === index);
+        });
+    }
+
+    // ============================================
+    // QUESTION GENERATORS
+    // ============================================
+
+    function generateConjugationQuestion(tense) {
+        const verb = verbs[Math.floor(Math.random() * verbs.length)];
+        const tenseData = verb[tense];
+        const pronouns = Object.keys(tenseData);
+        const pronoun = pronouns[Math.floor(Math.random() * pronouns.length)];
+        const correct = tenseData[pronoun];
+
+        // Generate wrong options from same verb different pronouns + different verbs
+        let options = [correct.form];
+        let allForms = [];
+
+        // Get forms from same verb, same tense (different pronouns)
+        for (let p in tenseData) {
+            if (p !== pronoun && tenseData[p].form !== correct.form) {
+                allForms.push(tenseData[p].form);
+            }
+        }
+        // Get forms from other verbs, same tense, same pronoun
+        verbs.forEach(v => {
+            if (v.id !== verb.id && v[tense][pronoun]) {
+                allForms.push(v[tense][pronoun].form);
+            }
+        });
+
+        // Shuffle and pick 3 wrong options
+        allForms = shuffleArray(allForms);
+        for (let i = 0; i < Math.min(3, allForms.length); i++) {
+            if (!options.includes(allForms[i])) {
+                options.push(allForms[i]);
+            }
+        }
+
+        // Fill remaining if needed
+        while (options.length < 4) {
+            const randVerb = verbs[Math.floor(Math.random() * verbs.length)];
+            const randPronouns = Object.keys(randVerb[tense]);
+            const randP = randPronouns[Math.floor(Math.random() * randPronouns.length)];
+            const randForm = randVerb[tense][randP].form;
+            if (!options.includes(randForm)) {
+                options.push(randForm);
+            }
+        }
+
+        options = shuffleArray(options).slice(0, 4);
+
+        const pronounMeaning = pronounMeanings[pronoun] || pronoun;
+        const tenseName = tenseNames[tense];
+
+        return {
+            type: `${tenseName} — ${verb.meaning}`,
+            arabic: pronoun,
+            english: `What is the ${tenseEnglish[tense]} tense form of "${verb.meaning}" for "${pronounMeaning}"?`,
+            hint: `Verb: ${verb.root} (${verb.meaning}) | Pronoun: ${pronoun} (${pronounMeaning})`,
+            options: options,
+            correct: correct.form,
+            explanation: `✅ ${pronoun} → ${correct.form} (${correct.translit})<br>
+                Verb: ${verb.root} = ${verb.meaning}<br>
+                Tense: ${tenseName}<br>
+                Pronoun: ${pronoun} = ${pronounMeaning}`
+        };
+    }
+
+    function generateIdentifyQuestion() {
+        const tenses = ['maazi', 'muzaare', 'amr'];
+        const tense = tenses[Math.floor(Math.random() * tenses.length)];
+        const verb = verbs[Math.floor(Math.random() * verbs.length)];
+        const tenseData = verb[tense];
+        const pronouns = Object.keys(tenseData);
+        const pronoun = pronouns[Math.floor(Math.random() * pronouns.length)];
+        const form = tenseData[pronoun];
+
+        return {
+            type: '🔍 Identify the Tense',
+            arabic: form.form,
+            english: `What tense is this verb form?`,
+            hint: `Verb root: ${verb.root} (${verb.meaning}) | Pronoun: ${pronoun}`,
+            options: ['ماضي (Past)', 'مُضَارِع (Present)', 'أَمْر (Command)', 'مَصْدَر (Verbal Noun)'],
+            correct: tense === 'maazi' ? 'ماضي (Past)' : tense === 'muzaare' ? 'مُضَارِع (Present)' : 'أَمْر (Command)',
+            explanation: `✅ ${form.form} is <strong>${tenseNames[tense]}</strong><br>
+                Verb: ${verb.root} = ${verb.meaning}<br>
+                Pronoun: ${pronoun} = ${pronounMeanings[pronoun]}<br>
+                Transliteration: ${form.translit}`
+        };
+    }
+
+    function generateTranslateQuestion() {
+        const tenses = ['maazi', 'muzaare', 'amr'];
+        const tense = tenses[Math.floor(Math.random() * tenses.length)];
+        const verb = verbs[Math.floor(Math.random() * verbs.length)];
+        const tenseData = verb[tense];
+        const pronouns = Object.keys(tenseData);
+        const pronoun = pronouns[Math.floor(Math.random() * pronouns.length)];
+        const correct = tenseData[pronoun];
+
+        // Build English translation
+        let engTemplate = tenseTranslations[tense][pronoun] || '';
+        let engSentence = engTemplate.replace('[verb]', verb.meaning.replace('to ', ''));
+        engSentence = engSentence.replace('[Verb]', verb.meaning.replace('to ', '').charAt(0).toUpperCase() + verb.meaning.replace('to ', '').slice(1));
+
+        // Options: correct + 3 wrong
+        let options = [correct.form];
+        let allForms = [];
+
+        // From different tenses of same verb same pronoun
+        tenses.forEach(t => {
+            if (t !== tense && verb[t][pronoun]) {
+                allForms.push(verb[t][pronoun].form);
+            }
+        });
+        // From different verbs same tense same pronoun
+        verbs.forEach(v => {
+            if (v.id !== verb.id && v[tense][pronoun]) {
+                allForms.push(v[tense][pronoun].form);
+            }
+        });
+
+        allForms = shuffleArray(allForms);
+        for (let i = 0; i < Math.min(3, allForms.length); i++) {
+            if (!options.includes(allForms[i])) {
+                options.push(allForms[i]);
+            }
+        }
+
+        while (options.length < 4) {
+            const rv = verbs[Math.floor(Math.random() * verbs.length)];
+            const rt = tenses[Math.floor(Math.random() * tenses.length)];
+            const rps = Object.keys(rv[rt]);
+            const rp = rps[Math.floor(Math.random() * rps.length)];
+            if (!options.includes(rv[rt][rp].form)) {
+                options.push(rv[rt][rp].form);
+            }
+        }
+
+        options = shuffleArray(options).slice(0, 4);
+
+        return {
+            type: '🌐 Translate to Arabic',
+            arabic: '',
+            english: `"${engSentence}"`,
+            hint: `Verb: ${verb.root} (${verb.meaning}) | Tense: ${tenseNames[tense]} | Pronoun: ${pronoun}`,
+            options: options,
+            correct: correct.form,
+            explanation: `✅ "${engSentence}" = ${correct.form} (${correct.translit})<br>
+                Verb: ${verb.root} = ${verb.meaning}<br>
+                Tense: ${tenseNames[tense]}<br>
+                Pronoun: ${pronoun} = ${pronounMeanings[pronoun]}`
+        };
+    }
+
+    // ============================================
+    // GAME LOGIC
+    // ============================================
+
+    function startGame(mode) {
+        gameState.mode = mode;
+        gameState.currentIndex = 0;
+        gameState.score = 0;
+        gameState.answered = false;
+        gameState.questions = [];
+
+        const numQuestions = 10;
+
+        for (let i = 0; i < numQuestions; i++) {
+            let question;
+            switch (mode) {
+                case 'maazi':
+                    question = generateConjugationQuestion('maazi');
+                    break;
+                case 'muzaare':
+                    question = generateConjugationQuestion('muzaare');
+                    break;
+                case 'amr':
+                    question = generateConjugationQuestion('amr');
+                    break;
+                case 'mixed':
+                    const tenses = ['maazi', 'muzaare', 'amr'];
+                    question = generateConjugationQuestion(tenses[Math.floor(Math.random() * tenses.length)]);
+                    break;
+                case 'identify':
+                    question = generateIdentifyQuestion();
+                    break;
+                case 'translate':
+                    question = generateTranslateQuestion();
+                    break;
+            }
+            gameState.questions.push(question);
+        }
+
+        // Show game screen
+        document.getElementById('menuScreen').style.display = 'none';
+        document.getElementById('learnScreen').style.display = 'none';
+        document.getElementById('gameScreen').style.display = 'block';
+        document.getElementById('resultsScreen').style.display = 'none';
+
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const q = gameState.questions[gameState.currentIndex];
+        gameState.answered = false;
+
+        document.getElementById('questionType').textContent = q.type;
+        document.getElementById('questionArabic').textContent = q.arabic;
+        document.getElementById('questionEnglish').textContent = q.english;
+        document.getElementById('questionHint').textContent = q.hint;
+
+        document.getElementById('currentQ').textContent = gameState.currentIndex + 1;
+        document.getElementById('totalQ').textContent = gameState.questions.length;
+
+        const progress = ((gameState.currentIndex) / gameState.questions.length) * 100;
+        document.getElementById('progressFill').style.width = progress + '%';
+
+        // Options
+        let optionsHTML = '';
+        q.options.forEach((option, index) => {
+            optionsHTML += `<button class="option-btn" onclick="checkAnswer(this, '${escapeQuotes(option)}', '${escapeQuotes(q.correct)}')" id="opt${index}">
+                ${option}
+            </button>`;
+        });
+        document.getElementById('optionsGrid').innerHTML = optionsHTML;
+
+        // Hide feedback and next
+        document.getElementById('feedback').className = 'feedback';
+        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('nextBtn').style.display = 'none';
+    }
+
+    function escapeQuotes(str) {
+        return str.replace(/'/g, "\\'").replace(/"/g, '\\"');
+    }
+
+    function checkAnswer(btn, selected, correct) {
+        if (gameState.answered) return;
+        gameState.answered = true;
+        gameState.totalAnswered++;
+
+        const q = gameState.questions[gameState.currentIndex];
+        const isCorrect = selected === correct;
+
+        // Highlight buttons
+        document.querySelectorAll('.option-btn').forEach(b => {
+            const btnText = b.textContent.trim();
+            if (btnText === correct) {
+                b.classList.add('correct');
+            }
+            if (b === btn && !isCorrect) {
+                b.classList.add('wrong');
+            }
+            b.style.pointerEvents = 'none';
+        });
+
+        // Update stats
+        if (isCorrect) {
+            gameState.score += 10;
+            gameState.totalCorrect++;
+            gameState.streak++;
+            if (gameState.streak > gameState.maxStreak) {
+                gameState.maxStreak = gameState.streak;
+            }
+
+            // Bonus for streak
+            if (gameState.streak >= 5) {
+                gameState.score += 5;
+            }
+
+            // Level up
+            if (gameState.totalCorrect % 10 === 0) {
+                gameState.level++;
+            }
+        } else {
+            gameState.streak = 0;
+        }
+
+        // Update display
+        document.getElementById('totalScore').textContent = gameState.score;
+        document.getElementById('streakCount').textContent = '🔥 ' + gameState.streak;
+        document.getElementById('accuracy').textContent = Math.round((gameState.totalCorrect / gameState.totalAnswered) * 100) + '%';
+        document.getElementById('level').textContent = gameState.level;
+
+        // Show feedback
+        const feedback = document.getElementById('feedback');
+        feedback.style.display = 'block';
+
+        if (isCorrect) {
+            feedback.className = 'feedback correct';
+            document.getElementById('feedbackEmoji').textContent = getRandomEmoji(true);
+            document.getElementById('feedbackText').textContent = getRandomMessage(true);
+        } else {
+            feedback.className = 'feedback wrong';
+            document.getElementById('feedbackEmoji').textContent = getRandomEmoji(false);
+            document.getElementById('feedbackText').innerHTML = `${getRandomMessage(false)}<br>The correct answer is: <span class="feedback-arabic" style="color:#43e97b; font-size:1.4em;">${correct}</span>`;
+        }
+
+        document.getElementById('feedbackExplanation').innerHTML = q.explanation;
+
+        // Show next button
+        document.getElementById('nextBtn').style.display = 'block';
+        document.getElementById('nextBtn').textContent =
+            gameState.currentIndex < gameState.questions.length - 1 ? 'Next Question →' : 'See Results 🏆';
+    }
+
+    function nextQuestion() {
+        gameState.currentIndex++;
+
+        if (gameState.currentIndex >= gameState.questions.length) {
+            showResults();
+        } else {
+            showQuestion();
+        }
+    }
+
+    function showResults() {
+        document.getElementById('gameScreen').style.display = 'none';
+        document.getElementById('resultsScreen').style.display = 'block';
+
+        const correct = gameState.questions.reduce((count, q, i) => {
+            return count + (gameState.score > 0 ? 1 : 0);
+        }, 0);
+
+        const total = gameState.questions.length;
+        const percentage = Math.round((gameState.totalCorrect / Math.max(gameState.totalAnswered, 1)) * 100);
+
+        let emoji, message;
+        if (percentage >= 90) {
+            emoji = '🏆🌟';
+            message = 'OUTSTANDING! You are an Arabic Verb Master! ما شاء الله';
+        } else if (percentage >= 70) {
+            emoji = '🎉😊';
+            message = 'Great job! Keep practicing and you\'ll master it! أحسنت';
+        } else if (percentage >= 50) {
+            emoji = '💪📚';
+            message = 'Good effort! Review the tables in Learn mode and try again!';
+        } else {
+            emoji = '📖✏️';
+            message = 'Don\'t worry! Go to Learn mode first, then try again. You can do it!';
+        }
+
+        document.getElementById('resultsEmoji').textContent = emoji;
+        document.getElementById('resultsScore').textContent = `${percentage}% Accuracy`;
+        document.getElementById('resultsMessage').innerHTML = `
+            ${message}<br><br>
+            <small>
+                Score: ${gameState.score} points | 
+                Best Streak: 🔥${gameState.maxStreak} | 
+                Level: ${gameState.level}
+            </small>
+        `;
+    }
+
+    function restartSameMode() {
+        startGame(gameState.mode);
+    }
+
+    function goToMenu() {
+        document.getElementById('menuScreen').style.display = 'block';
+        document.getElementById('learnScreen').style.display = 'none';
+        document.getElementById('gameScreen').style.display = 'none';
+        document.getElementById('resultsScreen').style.display = 'none';
+    }
+
+    // ============================================
+    // UTILITY FUNCTIONS
+    // ============================================
+
+    function shuffleArray(arr) {
+        const shuffled = [...arr];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    }
+
+    function getRandomEmoji(correct) {
+        if (correct) {
+            const emojis = ['🎉', '✅', '🌟', '💯', '🔥', '👏', '🎊', '⭐', '💪', '🏆'];
+            return emojis[Math.floor(Math.random() * emojis.length)];
+        } else {
+            const emojis = ['❌', '😅', '🤔', '📚', '💭', '🔄', '😊'];
+            return emojis[Math.floor(Math.random() * emojis.length)];
+        }
+    }
+
+    function getRandomMessage(correct) {
+        if (correct) {
+            const messages = [
+                'Excellent! أحسنت!',
+                'Perfect! ممتاز!',
+                'You got it! صحيح!',
+                'Well done! بارك الله فيك!',
+                'Amazing! ما شاء الله!',
+                'Brilliant! رائع!',
+                'Superb! عظيم!',
+                'Correct! Keep going!',
+                'Fantastic! You\'re learning fast!',
+                'Great memory! 🧠'
+            ];
+            return messages[Math.floor(Math.random() * messages.length)];
+        } else {
+            const messages = [
+                'Not quite, but don\'t give up!',
+                'Almost! Review and try again.',
+                'Keep learning, you\'ll get it!',
+                'Nice try! Check the explanation below.',
+                'Don\'t worry, practice makes perfect!',
+                'Learning from mistakes is the best way!',
+                'Good attempt! Remember this pattern.'
+            ];
+            return messages[Math.floor(Math.random() * messages.length)];
+        }
+    }
+
+    </script>
+</body>
+</html>
